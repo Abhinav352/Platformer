@@ -51,3 +51,5 @@ MonoBehaviour:
   dashEndRunLerp: 0.5
   dashRefillTime: 0.3
   dashInputBufferTime: 0.1
+  knockbackForce: 20
+  knockbackDuration: 0.5
