@@ -10,6 +10,7 @@ public class PlayerMovement : MonoBehaviour
 
 	#region COMPONENTS
 	public Rigidbody2D RB { get; private set; }
+	public Animator animator;
 	#endregion
 
 	#region STATE PARAMETERS
@@ -41,6 +42,8 @@ public class PlayerMovement : MonoBehaviour
 	private bool _dashRefilling;
 	private Vector2 _lastDashDir;
 	private bool _isDashAttacking;
+	
+	private bool isKnockback;
 
 	#endregion
 
@@ -71,6 +74,7 @@ public class PlayerMovement : MonoBehaviour
 	private void Awake()
 	{
 		RB = GetComponent<Rigidbody2D>();
+		animator = GetComponent<Animator>();
 	}
 
 	private void Start()
@@ -98,17 +102,17 @@ public class PlayerMovement : MonoBehaviour
 		if (_moveInput.x != 0)
 			CheckDirectionToFace(_moveInput.x > 0);
 
-		if (Input.GetKeyDown(KeyCode.Space) || Input.GetKeyDown(KeyCode.C) || Input.GetKeyDown(KeyCode.J))
+		if (Input.GetKeyDown(KeyCode.Space))
 		{
 			OnJumpInput();
 		}
 
-		if (Input.GetKeyUp(KeyCode.Space) || Input.GetKeyUp(KeyCode.C) || Input.GetKeyUp(KeyCode.J))
+		if (Input.GetKeyUp(KeyCode.Space))
 		{
 			OnJumpUpInput();
 		}
 
-		if (Input.GetKeyDown(KeyCode.X) || Input.GetKeyDown(KeyCode.LeftShift) || Input.GetKeyDown(KeyCode.K))
+		if (Input.GetKeyDown(KeyCode.LeftShift))
 		{
 			OnDashInput();
 		}
@@ -261,19 +265,20 @@ public class PlayerMovement : MonoBehaviour
 			SetGravityScale(0);
 		}
 		#endregion
+		animator.SetFloat("VelocityX", Mathf.Abs(RB.velocity.x / Data.runMaxSpeed));
 	}
 
 	private void FixedUpdate()
 	{
 		//Handle Run
-		if (!IsDashing)
+		if (!IsDashing && !isKnockback)
 		{
 			if (IsWallJumping)
 				Run(Data.wallJumpRunLerp);
 			else
 				Run(1);
 		}
-		else if (_isDashAttacking)
+		else if (_isDashAttacking && !isKnockback)
 		{
 			Run(Data.dashEndRunLerp);
 		}
@@ -377,6 +382,8 @@ public class PlayerMovement : MonoBehaviour
 		 * RB.velocity = new Vector2(RB.velocity.x + (Time.fixedDeltaTime  * speedDif * accelRate) / RB.mass, RB.velocity.y);
 		 * Time.fixedDeltaTime is by default in Unity 0.02 seconds equal to 50 FixedUpdate() calls per second
 		*/
+		
+
 	}
 
 	private void Turn()
@@ -385,7 +392,7 @@ public class PlayerMovement : MonoBehaviour
 		Vector3 scale = transform.localScale;
 		scale.x *= -1;
 		transform.localScale = scale;
-		transform.Rotate(0.0f, 180.0f, 0.0f);
+		
 
 		IsFacingRight = !IsFacingRight;
 	}
@@ -552,6 +559,28 @@ public class PlayerMovement : MonoBehaviour
 	}
 	#endregion
 
+	private void OnCollisionEnter2D(Collision2D collision)
+	{
+		if (collision.gameObject.CompareTag("Enemy"))
+		{
+			// Apply knockback effect
+			Vector2 knockbackDirection = transform.position - collision.transform.position;
+			knockbackDirection.Normalize();
+			StartCoroutine(Knockback(knockbackDirection));
+		}
+	}
+
+	private IEnumerator Knockback(Vector2 knockbackDirection)
+	{
+		isKnockback = true;
+
+		// Apply knockback force
+		RB.velocity = knockbackDirection * Data.knockbackForce;
+
+		yield return new WaitForSeconds(Data.knockbackDuration);
+
+		isKnockback = false;
+	}
 
 	#region EDITOR METHODS
 	private void OnDrawGizmosSelected()
