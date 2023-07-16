@@ -12,14 +12,17 @@ public class EnemyMovement : MonoBehaviour
     public float chaseSpeed = 4;
     public float spottingDistance = 5f;
     public float returnDistance = 10f;
+    private float duration = 1f;
 
     private Transform player;
+    
     private bool isChasing = false;
+    private Rigidbody2D rb;
 
     private void Start()
     {
         player = GameObject.FindGameObjectWithTag("Player").transform;
-        
+       rb = GetComponent<Rigidbody2D>();
     }
 
     private void Reset()
@@ -69,18 +72,27 @@ public class EnemyMovement : MonoBehaviour
 
     void MoveToNextPoint()
     {
+       
         Transform goalPoint = points[nextID];
-        
+
         //Flip the enemy transform to look into the point's direction
+      
         if (goalPoint.transform.position.x > transform.position.x)
+        {
+            
             transform.localScale = new Vector3(0.2f, 0.2f, 1);
+        }
         else
+        {
+           
             transform.localScale = new Vector3(-0.2f, 0.2f, 1);
+        }
         //Move the enemy towards the goal point
         transform.position = Vector2.MoveTowards(transform.position, goalPoint.position, patrolSpeed * Time.deltaTime);
         //Check the distance between enemy and goal point to trigger next point
         if (Vector2.Distance(transform.position, goalPoint.position) < 0.2f)
         {
+           
             //Check if we are at the end of the line (make the change -1)
             if (nextID == points.Count - 1)
                 idChangeValue = -1;
@@ -109,11 +121,18 @@ public class EnemyMovement : MonoBehaviour
 
         if (Vector2.Distance(transform.position, player.position) <= spottingDistance)
         {
+           
             // Player is within the spotting distance, move towards the player
             if (player.position.x > transform.position.x)
+            {
+                
                 transform.localScale = new Vector3(0.2f, 0.2f, 1);
+            }
             else
+            {
+                
                 transform.localScale = new Vector3(-0.2f, 0.2f, 1);
+            }
 
             transform.position = Vector2.MoveTowards(transform.position, player.position, chaseSpeed * Time.deltaTime);
         }
@@ -141,6 +160,7 @@ public class EnemyMovement : MonoBehaviour
             isChasing = false;
         }
     }
+  
 
     private void OnDrawGizmosSelected()
     {

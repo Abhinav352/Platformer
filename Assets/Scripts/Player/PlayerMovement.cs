@@ -75,6 +75,7 @@ public class PlayerMovement : MonoBehaviour
 	{
 		RB = GetComponent<Rigidbody2D>();
 		animator = GetComponent<Animator>();
+		Application.targetFrameRate = 144;
 	}
 
 	private void Start()
