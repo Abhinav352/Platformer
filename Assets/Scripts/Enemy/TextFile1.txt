@@ -1,26 +1,19 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 [RequireComponent(typeof(BoxCollider2D))]
 public class EnemyMovement : MonoBehaviour
 {
+    //Reference to waypoints
     public List<Transform> points;
+    //The int value for next point index
     public int nextID = 0;
+    //The value of that applies to ID for changing
     int idChangeValue = 1;
-    public float patrolSpeed = 2;
-    public float chaseSpeed = 4;
-    public float spottingDistance = 5f;
-    public float returnDistance = 10f;
+    //Speed of movement or flying
+    public float speed = 2;
 
-    private Transform player;
-    private bool isChasing = false;
+    public CharacterHealth health;
 
-    private void Start()
-    {
-        player = GameObject.FindGameObjectWithTag("Player").transform;
-        
-    }
 
     private void Reset()
     {
@@ -30,7 +23,7 @@ public class EnemyMovement : MonoBehaviour
     void Init()
     {
         //Make box collider trigger
-
+       
 
         //Create Root object
         GameObject root = new GameObject(name + "_Root");
@@ -57,27 +50,20 @@ public class EnemyMovement : MonoBehaviour
 
     private void Update()
     {
-        if (isChasing)
-        {
-            ChasePlayer();
-        }
-        else
-        {
-            MoveToNextPoint();
-        }
+        MoveToNextPoint();
     }
 
     void MoveToNextPoint()
     {
+        //Get the next Point transform
         Transform goalPoint = points[nextID];
-        
         //Flip the enemy transform to look into the point's direction
         if (goalPoint.transform.position.x > transform.position.x)
-            transform.localScale = new Vector3(0.2f, 0.2f, 1);
+            transform.localScale = new Vector3(0.2f, 0.2f,1);
         else
-            transform.localScale = new Vector3(-0.2f, 0.2f, 1);
+            transform.localScale = new Vector3(-0.2f,0.2f, 1);
         //Move the enemy towards the goal point
-        transform.position = Vector2.MoveTowards(transform.position, goalPoint.position, patrolSpeed * Time.deltaTime);
+        transform.position = Vector2.MoveTowards(transform.position, goalPoint.position, speed * Time.deltaTime);
         //Check the distance between enemy and goal point to trigger next point
         if (Vector2.Distance(transform.position, goalPoint.position) < 0.2f)
         {
@@ -92,59 +78,4 @@ public class EnemyMovement : MonoBehaviour
         }
     }
 
-    void ChasePlayer()
-    {
-        if (player == null)
-        {
-            isChasing = false;
-            return;
-        }
-
-        if (Vector2.Distance(transform.position, player.position) > returnDistance)
-        {
-            // Player is too far, go back to patrolling state
-            isChasing = false;
-            return;
-        }
-
-        if (Vector2.Distance(transform.position, player.position) <= spottingDistance)
-        {
-            // Player is within the spotting distance, move towards the player
-            if (player.position.x > transform.position.x)
-                transform.localScale = new Vector3(0.2f, 0.2f, 1);
-            else
-                transform.localScale = new Vector3(-0.2f, 0.2f, 1);
-
-            transform.position = Vector2.MoveTowards(transform.position, player.position, chaseSpeed * Time.deltaTime);
-        }
-    }
-
-    private void OnTriggerEnter2D(Collider2D other)
-    {
-        if (other.CompareTag("Player"))
-        {
-            isChasing = true;
-        }
-    }
-    private void OnTriggerStay2D(Collider2D other)
-    {
-        if (other.CompareTag("Player"))
-        {
-            isChasing = true;
-        }
-    }
-
-    private void OnTriggerExit2D(Collider2D other)
-    {
-        if (other.CompareTag("Player"))
-        {
-            isChasing = false;
-        }
-    }
-
-    private void OnDrawGizmosSelected()
-    {
-        Gizmos.color = Color.yellow;
-        Gizmos.DrawWireSphere(transform.position, spottingDistance);
-    }
 }
