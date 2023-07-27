@@ -12,7 +12,7 @@ public class EnemyMovement : MonoBehaviour
     public float chaseSpeed = 4;
     public float spottingDistance = 5f;
     public float returnDistance = 10f;
-    private float duration = 1f;
+    // private float duration = 1f;
 
     private Transform player;
     
