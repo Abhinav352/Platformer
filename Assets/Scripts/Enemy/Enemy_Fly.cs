@@ -32,7 +32,7 @@ public class Enemy_Fly : MonoBehaviour
             }
             else
             {
-                Vector3 direction = (GameObject.Find("player").transform.position - transform.position).normalized;
+                Vector3 direction = (GameObject.Find("Player").transform.position - transform.position).normalized;
                 transform.position += direction * aggroSpeed * Time.deltaTime;
             }
         }
@@ -40,7 +40,7 @@ public class Enemy_Fly : MonoBehaviour
         {
             transform.position += Vector3.down * speed * Time.deltaTime;
 
-            if (Vector3.Distance(GameObject.Find("player").transform.position, transform.position) <= aggroRadius)
+            if (Vector3.Distance(GameObject.Find("Player").transform.position, transform.position) <= aggroRadius)
             {
                 isAggroed = true;
                 aggroTimer = aggroTime;
